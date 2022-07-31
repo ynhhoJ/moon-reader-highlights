@@ -1,10 +1,10 @@
 const fastify = require('fastify')({ logger: true })
 
 type Highlight = {
-  title: string;
-  text: string;
   author: string;
   chapter: string;
+  text: string;
+  title: string;
 }
 type MoonReaderBodyRequest = {
   highlights: Array<Highlight> | undefined;
