@@ -7,7 +7,7 @@ type Highlight = {
   chapter: string;
 }
 type MoonReaderBodyRequest = {
-  highlights: Array<Highlight>;
+  highlights: Array<Highlight> | undefined;
 }
 
 interface FastifyRequest {
