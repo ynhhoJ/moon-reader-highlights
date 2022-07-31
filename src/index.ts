@@ -1,4 +1,6 @@
 const fastify = require('fastify')({ logger: true })
+const sqlite3 = require('sqlite3');
+const { open } = require('sqlite');
 
 type Highlight = {
   author: string;
@@ -15,7 +17,28 @@ interface FastifyRequest {
 }
 
 fastify.post('/', async (request: FastifyRequest) => {
-  console.log(request.body);
+  const { body } = request;
+  const { highlights } = body;
+  
+  if (!highlights) {
+    return 404;
+  }
+  
+  const db = await open({
+    filename: './database.db',
+    driver: sqlite3.Database
+  });
+
+  for (const highlight of highlights) {
+    const { title, text, author, chapter } = highlight;
+
+    await db.run(`INSERT INTO highlights values (:title, :text, :author, :chapter)`, {
+      ':title': title,
+      ':text': text,
+      ':author': author,
+      ':chapter': chapter,
+    })
+  }
 
   return { hello: 'world' };
 });
@@ -30,6 +53,13 @@ const basicFastifyListenOptions = {
 };
 
 const start = async () => {
+  const db = await open({
+    filename: './database.db',
+    driver: sqlite3.Database
+  });
+
+  await db.exec("CREATE TABLE IF NOT EXISTS highlights (title Text, text Text, Author Text, Chapter Text)");
+  
   try {
     await fastify.listen(basicFastifyListenOptions);
   } catch (err) {
