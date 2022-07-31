@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "dev": "ts-node \"./src/index.ts\""
+  },
   "dependencies": {
     "fastify": "^4.3.0",
     "sqlite": "^4.1.2"
