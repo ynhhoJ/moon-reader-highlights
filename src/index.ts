@@ -17,17 +17,25 @@ interface FastifyRequest {
 fastify.post('/', async (request: FastifyRequest) => {
   console.log(request.body);
 
-  return { hello: 'world' }
-})
+  return { hello: 'world' };
+});
 
+// NOTE: Set this variable to false if you want to stop listening on all available IPv4 interfaces
+//       https://www.fastify.io/docs/latest/Guides/Getting-Started/#your-first-server
+const shouldListenAllIpv4 = true;
+const basicFastifyListenOptions = {
+  port: 3000,
+
+  host: shouldListenAllIpv4 ? '0.0.0.0' : undefined,
+};
 
 const start = async () => {
   try {
-    await fastify.listen({ port: 3000, host: '0.0.0.0' })
+    await fastify.listen(basicFastifyListenOptions);
   } catch (err) {
-    fastify.log.error(err)
-    process.exit(1)
+    fastify.log.error(err);
+    process.exit(1);
   }
-}
+};
 
 start().then(() => console.log("[🌙] Moon+ Reader highlight server is up!"));
