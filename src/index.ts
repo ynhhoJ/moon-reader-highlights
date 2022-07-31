@@ -6,12 +6,12 @@ type Highlight = {
   author: string;
   chapter: string;
 }
-type Body = {
+type MoonReaderBodyRequest = {
   highlights: Array<Highlight>;
 }
 
 interface FastifyRequest {
-  body: Body;
+  body: MoonReaderBodyRequest;
 }
 
 fastify.post('/', async (request: FastifyRequest) => {
