@@ -21,6 +21,7 @@ fastify.post('/', async (request: FastifyRequest) => {
   const { highlights } = body;
   
   if (!highlights) {
+    // TODO: Replace with 404 error
     return 404;
   }
   
@@ -32,11 +33,13 @@ fastify.post('/', async (request: FastifyRequest) => {
   for (const highlight of highlights) {
     const { title, text, author, chapter } = highlight;
 
-    await db.run(`INSERT INTO highlights values (:title, :text, :author, :chapter)`, {
-      ':title': title,
-      ':text': text,
+    await db.run(`INSERT INTO highlights values (:id, :author, :title,  :chapter, :text, :highlightedAt)`, {
       ':author': author,
       ':chapter': chapter,
+      ':highlightedAt': new Date().toISOString(),
+      ':id': undefined,
+      ':text': text,
+      ':title': title,
     })
   }
 
@@ -58,7 +61,16 @@ const start = async () => {
     driver: sqlite3.Database
   });
 
-  await db.exec("CREATE TABLE IF NOT EXISTS highlights (title Text, text Text, Author Text, Chapter Text)");
+  await db.exec(`CREATE TABLE
+    IF NOT EXISTS highlights (
+        id              INTEGER PRIMARY KEY,
+        author          TEXT,
+        title           TEXT,
+        chapter         TEXT,
+        text            TEXT,
+        highlightedAt   TEXT
+    )
+  `);
   
   try {
     await fastify.listen(basicFastifyListenOptions);
