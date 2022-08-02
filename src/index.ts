@@ -10,11 +10,24 @@ type Highlight = {
   chapter: string;
   text: string;
   title: string;
-}
+};
+
 type MoonReaderBodyRequest = {
   highlights: Array<Highlight> | undefined;
-}
-type FastifyResponse = FastifyReply<http.Server, http.IncomingMessage, http.ServerResponse, any, any, any, FastifyTypeProviderDefault>
+};
+
+type FastifyResponse = FastifyReply<
+    http.Server,
+    http.IncomingMessage,
+    http.ServerResponse,
+    // NOTE: RouteGeneric
+    any,
+    // NOTE: ContextConfig
+    any,
+    // NOTE: SchemaCompiler
+    any,
+    FastifyTypeProviderDefault
+  >;
 
 interface FastifyRequest {
   body: MoonReaderBodyRequest;
@@ -23,11 +36,11 @@ interface FastifyRequest {
 fastify.post('/', async (request: FastifyRequest, response: FastifyResponse) => {
   const { body } = request;
   const { highlights } = body;
-  
+
   if (!highlights) {
     return response.callNotFound();
   }
-  
+
   const db = await open({
     filename: './database.db',
     driver: sqlite3.Database
@@ -43,7 +56,7 @@ fastify.post('/', async (request: FastifyRequest, response: FastifyResponse) => 
       ':id': undefined,
       ':text': text,
       ':title': title,
-    })
+    });
   }
 
   return response.code(200);
@@ -74,13 +87,15 @@ const start = async () => {
         highlightedAt   TEXT
     )
   `);
-  
+
   try {
     await fastify.listen(basicFastifyListenOptions);
   } catch (err) {
     fastify.log.error(err);
+
     process.exit(1);
   }
 };
 
-start().then(() => console.log("[🌙] Moon+ Reader highlight server is up!"));
+start()
+  .then(() => console.log("[🌙] Moon+ Reader highlight server is up!"));
