@@ -1,3 +1,6 @@
+import {FastifyReply, FastifyTypeProviderDefault} from "fastify";
+import * as http from "http";
+
 const fastify = require('fastify')({ logger: true })
 const sqlite3 = require('sqlite3');
 const { open } = require('sqlite');
@@ -11,18 +14,18 @@ type Highlight = {
 type MoonReaderBodyRequest = {
   highlights: Array<Highlight> | undefined;
 }
+type FastifyResponse = FastifyReply<http.Server, http.IncomingMessage, http.ServerResponse, any, any, any, FastifyTypeProviderDefault>
 
 interface FastifyRequest {
   body: MoonReaderBodyRequest;
 }
 
-fastify.post('/', async (request: FastifyRequest) => {
+fastify.post('/', async (request: FastifyRequest, response: FastifyResponse) => {
   const { body } = request;
   const { highlights } = body;
   
   if (!highlights) {
-    // TODO: Replace with 404 error
-    return 404;
+    return response.callNotFound();
   }
   
   const db = await open({
@@ -43,7 +46,7 @@ fastify.post('/', async (request: FastifyRequest) => {
     })
   }
 
-  return { hello: 'world' };
+  return response.code(200);
 });
 
 // NOTE: Set this variable to false if you want to stop listening on all available IPv4 interfaces
