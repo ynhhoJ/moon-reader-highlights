@@ -1,3 +1,6 @@
+import {FastifyReply, FastifyTypeProviderDefault} from "fastify";
+import * as http from "http";
+
 const fastify = require('fastify')({ logger: true })
 const sqlite3 = require('sqlite3');
 const { open } = require('sqlite');
@@ -7,24 +10,37 @@ type Highlight = {
   chapter: string;
   text: string;
   title: string;
-}
+};
+
 type MoonReaderBodyRequest = {
   highlights: Array<Highlight> | undefined;
-}
+};
+
+type FastifyResponse = FastifyReply<
+    http.Server,
+    http.IncomingMessage,
+    http.ServerResponse,
+    // NOTE: RouteGeneric
+    any,
+    // NOTE: ContextConfig
+    any,
+    // NOTE: SchemaCompiler
+    any,
+    FastifyTypeProviderDefault
+  >;
 
 interface FastifyRequest {
   body: MoonReaderBodyRequest;
 }
 
-fastify.post('/', async (request: FastifyRequest) => {
+fastify.post('/', async (request: FastifyRequest, response: FastifyResponse) => {
   const { body } = request;
   const { highlights } = body;
-  
+
   if (!highlights) {
-    // TODO: Replace with 404 error
-    return 404;
+    return response.callNotFound();
   }
-  
+
   const db = await open({
     filename: './database.db',
     driver: sqlite3.Database
@@ -40,10 +56,10 @@ fastify.post('/', async (request: FastifyRequest) => {
       ':id': undefined,
       ':text': text,
       ':title': title,
-    })
+    });
   }
 
-  return { hello: 'world' };
+  return response.code(200);
 });
 
 // NOTE: Set this variable to false if you want to stop listening on all available IPv4 interfaces
@@ -71,13 +87,15 @@ const start = async () => {
         highlightedAt   TEXT
     )
   `);
-  
+
   try {
     await fastify.listen(basicFastifyListenOptions);
   } catch (err) {
     fastify.log.error(err);
+
     process.exit(1);
   }
 };
 
-start().then(() => console.log("[🌙] Moon+ Reader highlight server is up!"));
+start()
+  .then(() => console.log("[🌙] Moon+ Reader highlight server is up!"));
