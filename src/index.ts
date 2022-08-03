@@ -10,6 +10,7 @@ type Highlight = {
   chapter: string;
   text: string;
   title: string;
+  note: string;
 };
 
 type MoonReaderBodyRequest = {
@@ -47,13 +48,14 @@ fastify.post('/', async (request: FastifyRequest, response: FastifyResponse) => 
   });
 
   for (const highlight of highlights) {
-    const { title, text, author, chapter } = highlight;
+    const { author, chapter, note, text, title } = highlight;
 
-    await db.run(`INSERT INTO highlights values (:id, :author, :title,  :chapter, :text, :highlightedAt)`, {
+    await db.run(`INSERT INTO highlights values (:id, :author, :title,  :chapter, :text, :note, :highlightedAt)`, {
       ':author': author,
       ':chapter': chapter,
       ':highlightedAt': new Date().toISOString(),
       ':id': undefined,
+      ':note': note,
       ':text': text,
       ':title': title,
     });
@@ -84,6 +86,7 @@ const start = async () => {
         title           TEXT,
         chapter         TEXT,
         text            TEXT,
+        note            TEXT,
         highlightedAt   TEXT
     )
   `);
