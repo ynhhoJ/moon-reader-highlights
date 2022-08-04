@@ -61,7 +61,7 @@ fastify.post('/', async (request: FastifyRequest, response: FastifyResponse) => 
     });
   }
 
-  return response.code(200);
+  return response.code(201);
 });
 
 // NOTE: Set this variable to false if you want to stop listening on all available IPv4 interfaces
